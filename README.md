@@ -2,6 +2,8 @@
 
 Une roue de la fortune interactive inspirée du dessin animé "Les malheurs de Sophie" pour enfants.
 
+🌐 **[Voir le site en ligne](https://romanetvin.github.io/roulette-lulu/)**
+
 ## 🎨 Caractéristiques
 
 - **Roue interactive** : Cliquez pour faire tourner et découvrir un résultat aléatoire
@@ -28,11 +30,9 @@ Dans le terminal, depuis ce dossier, exécutez :
 git add .
 git commit -m "Initial commit: Les malheurs de Lulu"
 git branch -M main
-git remote add origin https://github.com/VOTRE-NOM-UTILISATEUR/roulette-lulu.git
+git remote add origin https://github.com/romanetvin/roulette-lulu.git
 git push -u origin main
 ```
-
-⚠️ Remplacez `VOTRE-NOM-UTILISATEUR` par votre nom d'utilisateur GitHub.
 
 ### Étape 3 : Activer GitHub Pages
 
@@ -41,7 +41,7 @@ git push -u origin main
 3. Sous "Source", sélectionnez la branche `main`
 4. Cliquez sur "Save"
 5. Après quelques minutes, votre site sera disponible à l'adresse :
-   `https://VOTRE-NOM-UTILISATEUR.github.io/roulette-lulu/`
+   `https://romanetvin.github.io/roulette-lulu/`
 
 ## 📝 Utilisation
 
