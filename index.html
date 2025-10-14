@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Les malheurs de Lulu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive;
+            background: linear-gradient(135deg, #FFB6C1 0%, #FFE4E1 50%, #B0E0E6 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            color: #FF69B4;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2);
+            margin: 30px 0;
+            font-size: 3em;
+            text-align: center;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            max-width: 90vw;
+            max-height: 90vw;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 10px solid #FFD700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6),
+                        inset 0 0 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            background: #fff;
+        }
+
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-radius: 50%;
+            border: 5px solid #fff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+            border-top: 60px solid #FF1493;
+            filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.3));
+            z-index: 5;
+        }
+
+        .segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            top: 50%;
+            left: 50%;
+            transform-origin: 0% 0%;
+            clip-path: polygon(0 0, 100% 0, 0 100%);
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            padding: 50px 10px 10px 10px;
+        }
+
+        .segment-text {
+            position: absolute;
+            top: 35%;
+            left: 25%;
+            font-size: 0.9em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            white-space: nowrap;
+            transform: rotate(-45deg) translate(-50%, -50%);
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 1.3em;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #spinBtn {
+            background: linear-gradient(135deg, #FF69B4, #FF1493);
+            color: white;
+        }
+
+        #spinBtn:hover:not(:disabled) {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 8px 20px rgba(255, 105, 180, 0.4);
+        }
+
+        #spinBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result {
+            min-height: 80px;
+            background: white;
+            padding: 20px 40px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #FF1493;
+            text-align: center;
+            max-width: 600px;
+            word-wrap: break-word;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .options-panel {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .options-panel h2 {
+            color: #FF69B4;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .add-option {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .add-option input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #FFB6C1;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        .add-option button {
+            padding: 12px 30px;
+            font-size: 1em;
+            background: linear-gradient(135deg, #87CEEB, #4682B4);
+            color: white;
+        }
+
+        .add-option button:hover {
+            transform: scale(1.05);
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .option-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: #FFF0F5;
+            border-radius: 10px;
+            border: 2px solid #FFB6C1;
+        }
+
+        .option-item span {
+            flex: 1;
+            color: #FF1493;
+            font-weight: bold;
+        }
+
+        .option-item button {
+            padding: 5px 15px;
+            font-size: 0.9em;
+            background: #FF6B6B;
+            color: white;
+        }
+
+        .option-item button:hover {
+            background: #FF4444;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .wheel-container {
+                width: 350px;
+                height: 350px;
+            }
+
+            button {
+                padding: 12px 30px;
+                font-size: 1.1em;
+            }
+
+            .result {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Les malheurs de Lulu</h1>
+
+    <div class="container">
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <div class="wheel" id="wheel">
+                <div class="wheel-center">LULU</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="spinBtn">Tourner la roue !</button>
+            <div class="result" id="result">Clique pour découvrir ton malheur !</div>
+        </div>
+
+        <div class="options-panel">
+            <h2>Gérer les options</h2>
+            <div class="add-option">
+                <input type="text" id="newOption" placeholder="Ajouter une nouvelle option..." maxlength="50">
+                <button onclick="addOption()">Ajouter</button>
+            </div>
+            <div class="options-list" id="optionsList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Default options inspired by "Les malheurs de Sophie"
+        let options = [
+            "Tomber dans la boue",
+            "Perdre son chapeau",
+            "Casser un jouet",
+            "Renverser son goûter",
+            "Se salir en jouant",
+            "Déchirer sa robe",
+            "Oublier ses devoirs",
+            "Se faire gronder"
+        ];
+
+        // Colors for wheel segments
+        const colors = [
+            '#FF69B4', '#87CEEB', '#FFD700', '#98FB98',
+            '#FF6B6B', '#DDA0DD', '#F0E68C', '#FFB6C1'
+        ];
+
+        let isSpinning = false;
+        let currentRotation = 0;
+
+        // Load options from localStorage
+        function loadOptions() {
+            const saved = localStorage.getItem('rouletteLuluOptions');
+            if (saved) {
+                options = JSON.parse(saved);
+            }
+        }
+
+        // Save options to localStorage
+        function saveOptions() {
+            localStorage.setItem('rouletteLuluOptions', JSON.stringify(options));
+        }
+
+        // Create wheel segments
+        function createWheel() {
+            const wheel = document.getElementById('wheel');
+            // Clear existing segments (keep center)
+            const center = wheel.querySelector('.wheel-center');
+            wheel.innerHTML = '';
+            wheel.appendChild(center);
+
+            const angleStep = 360 / options.length;
+
+            options.forEach((option, index) => {
+                const segment = document.createElement('div');
+                segment.className = 'segment';
+                segment.style.transform = `rotate(${angleStep * index}deg) skewY(${-90 + angleStep}deg)`;
+                segment.style.background = colors[index % colors.length];
+
+                const text = document.createElement('div');
+                text.className = 'segment-text';
+                text.textContent = option;
+                text.style.transform = `skewY(${90 - angleStep}deg) rotate(${angleStep / 2}deg)`;
+
+                segment.appendChild(text);
+                wheel.appendChild(segment);
+            });
+        }
+
+        // Spin the wheel
+        function spinWheel() {
+            if (isSpinning || options.length === 0) return;
+
+            isSpinning = true;
+            document.getElementById('spinBtn').disabled = true;
+            document.getElementById('result').textContent = 'La roue tourne...';
+
+            // Random spins between 5 and 10 full rotations + random offset
+            const minSpins = 5;
+            const maxSpins = 10;
+            const spins = Math.random() * (maxSpins - minSpins) + minSpins;
+            const degrees = spins * 360;
+
+            // Random final position
+            const randomDegree = Math.random() * 360;
+            const totalRotation = currentRotation + degrees + randomDegree;
+
+            const wheel = document.getElementById('wheel');
+            wheel.style.transform = `rotate(${totalRotation}deg)`;
+            currentRotation = totalRotation;
+
+            // Calculate result after animation
+            setTimeout(() => {
+                const normalizedRotation = (360 - (totalRotation % 360)) % 360;
+                const angleStep = 360 / options.length;
+                const winningIndex = Math.floor(normalizedRotation / angleStep);
+                const result = options[winningIndex];
+
+                document.getElementById('result').textContent = `🎉 ${result} !`;
+                isSpinning = false;
+                document.getElementById('spinBtn').disabled = false;
+            }, 4000);
+        }
+
+        // Add new option
+        function addOption() {
+            const input = document.getElementById('newOption');
+            const value = input.value.trim();
+
+            if (value && !options.includes(value)) {
+                options.push(value);
+                saveOptions();
+                createWheel();
+                updateOptionsList();
+                input.value = '';
+            }
+        }
+
+        // Remove option
+        function removeOption(index) {
+            if (options.length > 2) {
+                options.splice(index, 1);
+                saveOptions();
+                createWheel();
+                updateOptionsList();
+            } else {
+                alert('Il faut au moins 2 options !');
+            }
+        }
+
+        // Update options list display
+        function updateOptionsList() {
+            const list = document.getElementById('optionsList');
+            list.innerHTML = '';
+
+            options.forEach((option, index) => {
+                const item = document.createElement('div');
+                item.className = 'option-item';
+
+                const span = document.createElement('span');
+                span.textContent = option;
+
+                const btn = document.createElement('button');
+                btn.textContent = 'Supprimer';
+                btn.onclick = () => removeOption(index);
+
+                item.appendChild(span);
+                item.appendChild(btn);
+                list.appendChild(item);
+            });
+        }
+
+        // Allow Enter key to add option
+        document.getElementById('newOption').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addOption();
+            }
+        });
+
+        // Initialize
+        loadOptions();
+        createWheel();
+        updateOptionsList();
+
+        // Spin button event
+        document.getElementById('spinBtn').addEventListener('click', spinWheel);
+    </script>
+</body>
+</html>
