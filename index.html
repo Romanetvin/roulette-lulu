@@ -15,9 +15,6 @@
             font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive;
             background: linear-gradient(135deg, #FFB6C1 0%, #FFE4E1 50%, #B0E0E6 100%);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             padding: 20px;
             overflow-x: hidden;
         }
@@ -25,7 +22,7 @@
         h1 {
             color: #FF69B4;
             text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2);
-            margin: 30px 0;
+            margin-bottom: 30px;
             font-size: 3em;
             text-align: center;
             animation: bounce 2s ease-in-out infinite;
@@ -37,20 +34,36 @@
         }
 
         .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        .left-section {
             display: flex;
             flex-direction: column;
-            align-items: center;
             gap: 30px;
-            max-width: 1200px;
-            width: 100%;
+            align-items: center;
+        }
+
+        .right-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         .wheel-container {
             position: relative;
-            width: 500px;
-            height: 500px;
+            width: 540px;
+            height: 540px;
             max-width: 90vw;
             max-height: 90vw;
+            margin-top: 100px;
         }
 
         .wheel {
@@ -63,6 +76,16 @@
             position: relative;
             transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
             background: #fff;
+            overflow: hidden;
+        }
+
+        .wheel-svg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
         }
 
         .wheel-center {
@@ -76,13 +99,14 @@
             border-radius: 50%;
             border: 5px solid #fff;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-            z-index: 10;
+            z-index: 20;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             color: white;
             font-size: 1.2em;
+            pointer-events: none;
         }
 
         .pointer {
@@ -99,31 +123,19 @@
             z-index: 5;
         }
 
-        .segment {
-            position: absolute;
-            width: 50%;
-            height: 50%;
-            top: 50%;
-            left: 50%;
-            transform-origin: 0% 0%;
-            clip-path: polygon(0 0, 100% 0, 0 100%);
-            display: flex;
-            align-items: flex-start;
-            justify-content: flex-start;
-            padding: 50px 10px 10px 10px;
-        }
-
         .segment-text {
             position: absolute;
-            top: 35%;
-            left: 25%;
-            font-size: 0.9em;
+            font-size: 0.95em;
             font-weight: bold;
             color: white;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            text-align: center;
+            line-height: 1.2;
+            transform-origin: center;
+            z-index: 2;
+            pointer-events: none;
             white-space: nowrap;
-            transform: rotate(-45deg) translate(-50%, -50%);
-            max-width: 120px;
+            max-width: 40%;
             overflow: hidden;
             text-overflow: ellipsis;
         }
@@ -256,6 +268,21 @@
             transform: scale(1.05);
         }
 
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            h1 {
+                text-align: center;
+            }
+
+            .right-section {
+                order: -1;
+            }
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 2em;
@@ -278,43 +305,54 @@
     </style>
 </head>
 <body>
-    <h1>Les malheurs de Lulu</h1>
-
     <div class="container">
-        <div class="wheel-container">
-            <div class="pointer"></div>
-            <div class="wheel" id="wheel">
-                <div class="wheel-center">LULU</div>
+        <div class="left-section">
+            <h1>Les malheurs de Lulu</h1>
+
+            <div class="controls">
+                <button id="spinBtn">Tourner la roue !</button>
+                <div class="result" id="result">Clique pour découvrir ton malheur !</div>
+            </div>
+
+            <div class="options-panel">
+                <h2>Gérer les options</h2>
+                <div class="add-option">
+                    <input type="text" id="newOption" placeholder="Ajouter une nouvelle option..." maxlength="50">
+                    <button onclick="addOption()">Ajouter</button>
+                </div>
+                <div class="options-list" id="optionsList"></div>
             </div>
         </div>
 
-        <div class="controls">
-            <button id="spinBtn">Tourner la roue !</button>
-            <div class="result" id="result">Clique pour découvrir ton malheur !</div>
-        </div>
-
-        <div class="options-panel">
-            <h2>Gérer les options</h2>
-            <div class="add-option">
-                <input type="text" id="newOption" placeholder="Ajouter une nouvelle option..." maxlength="50">
-                <button onclick="addOption()">Ajouter</button>
+        <div class="right-section">
+            <div class="wheel-container">
+                <div class="pointer"></div>
+                <div class="wheel" id="wheel">
+                    <div class="wheel-center">LULU</div>
+                </div>
             </div>
-            <div class="options-list" id="optionsList"></div>
         </div>
     </div>
 
     <script>
-        // Default options inspired by "Les malheurs de Sophie"
+        // Default options
         let options = [
-            "Tomber dans la boue",
-            "Perdre son chapeau",
-            "Casser un jouet",
-            "Renverser son goûter",
-            "Se salir en jouant",
-            "Déchirer sa robe",
-            "Oublier ses devoirs",
-            "Se faire gronder"
+            "Se bloquer le dos",
+            "Tomber malade",
+            "JP fait des jeanpauleries",
+            "Retard d'acompte",
+            "J'ai oublié ma tarte au butternut",
+            "L'enfant n'a pas dormi",
+            "L'enfant a fait pipi au lit",
+            "Océane me fait des misères",
+            "Geoffroy me fait des misères",
+            "François n'a pas le budget",
+            "Tout va bien !"
         ];
+
+        // Special option with small probability (5%)
+        const SPECIAL_OPTION = "Tout va bien !";
+        const SPECIAL_PROBABILITY = 0.02; // 5% chance
 
         // Colors for wheel segments
         const colors = [
@@ -329,7 +367,34 @@
         function loadOptions() {
             const saved = localStorage.getItem('rouletteLuluOptions');
             if (saved) {
-                options = JSON.parse(saved);
+                const savedOptions = JSON.parse(saved);
+                // Check if we need to update with new default options
+                const defaultOptions = [
+                    "Se bloquer le dos",
+                    "Tomber malade",
+                    "JP fait des jeanpauleries",
+                    "Retard d'acompte",
+                    "J'ai oublié ma tarte au butternut",
+                    "L'enfant n'a pas dormi",
+                    "L'enfant a fait pipi au lit",
+                    "Océane me fait des misères",
+                    "Geoffroy me fait des misères",
+                    "François n'a pas le budget",
+                    "Tout va bien !"
+                ];
+
+                // If saved has fewer items than defaults, use defaults
+                if (savedOptions.length < defaultOptions.length) {
+                    options = defaultOptions;
+                    saveOptions();
+                } else {
+                    options = savedOptions;
+                    // Ensure special option exists
+                    if (!options.includes(SPECIAL_OPTION)) {
+                        options.push(SPECIAL_OPTION);
+                        saveOptions();
+                    }
+                }
             }
         }
 
@@ -338,30 +403,108 @@
             localStorage.setItem('rouletteLuluOptions', JSON.stringify(options));
         }
 
+        // Calculate segment angles based on probabilities
+        function calculateSegmentAngles() {
+            const segments = [];
+            let currentAngle = 0;
+
+            // Check if special option exists
+            const specialIndex = options.indexOf(SPECIAL_OPTION);
+            const hasSpecial = specialIndex !== -1;
+
+            if (hasSpecial) {
+                // Special option gets small angle
+                const specialAngle = 360 * SPECIAL_PROBABILITY;
+                const remainingAngle = 360 - specialAngle;
+                const normalAngle = remainingAngle / (options.length - 1);
+
+                options.forEach((option, index) => {
+                    const angle = option === SPECIAL_OPTION ? specialAngle : normalAngle;
+                    segments.push({
+                        option: option,
+                        startAngle: currentAngle,
+                        endAngle: currentAngle + angle,
+                        angle: angle
+                    });
+                    currentAngle += angle;
+                });
+            } else {
+                // Equal angles for all
+                const angleStep = 360 / options.length;
+                options.forEach((option, index) => {
+                    segments.push({
+                        option: option,
+                        startAngle: currentAngle,
+                        endAngle: currentAngle + angleStep,
+                        angle: angleStep
+                    });
+                    currentAngle += angleStep;
+                });
+            }
+
+            return segments;
+        }
+
         // Create wheel segments
         function createWheel() {
             const wheel = document.getElementById('wheel');
             // Clear existing segments (keep center)
             const center = wheel.querySelector('.wheel-center');
             wheel.innerHTML = '';
-            wheel.appendChild(center);
 
-            const angleStep = 360 / options.length;
+            // Create SVG for pie slices
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'wheel-svg');
+            svg.setAttribute('viewBox', '0 0 100 100');
 
-            options.forEach((option, index) => {
-                const segment = document.createElement('div');
-                segment.className = 'segment';
-                segment.style.transform = `rotate(${angleStep * index}deg) skewY(${-90 + angleStep}deg)`;
-                segment.style.background = colors[index % colors.length];
+            const centerX = 50;
+            const centerY = 50;
+            const radius = 50;
+
+            const segments = calculateSegmentAngles();
+
+            segments.forEach((segment, index) => {
+                const startAngle = (segment.startAngle - 90) * Math.PI / 180;
+                const endAngle = (segment.endAngle - 90) * Math.PI / 180;
+
+                // Calculate path coordinates
+                const x1 = centerX + radius * Math.cos(startAngle);
+                const y1 = centerY + radius * Math.sin(startAngle);
+                const x2 = centerX + radius * Math.cos(endAngle);
+                const y2 = centerY + radius * Math.sin(endAngle);
+
+                // Create pie slice path
+                const largeArcFlag = segment.angle > 180 ? 1 : 0;
+                const pathData = `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', pathData);
+                path.setAttribute('fill', colors[index % colors.length]);
+                path.setAttribute('stroke', 'rgba(255, 255, 255, 0.3)');
+                path.setAttribute('stroke-width', '0.5');
+
+                svg.appendChild(path);
+
+                // Create text element
+                const midAngle = ((segment.startAngle + segment.endAngle) / 2 - 90) * Math.PI / 180;
+                const textRadius = radius * 0.65;
+                const textX = centerX + textRadius * Math.cos(midAngle);
+                const textY = centerY + textRadius * Math.sin(midAngle);
 
                 const text = document.createElement('div');
                 text.className = 'segment-text';
-                text.textContent = option;
-                text.style.transform = `skewY(${90 - angleStep}deg) rotate(${angleStep / 2}deg)`;
+                text.textContent = segment.option;
+                text.style.left = `${textX}%`;
+                text.style.top = `${textY}%`;
+                // Rotate text to align with radius (perpendicular to the arc)
+                const textRotation = (segment.startAngle + segment.endAngle) / 2 + 90;
+                text.style.transform = `translate(-50%, -50%) rotate(${textRotation}deg)`;
 
-                segment.appendChild(text);
-                wheel.appendChild(segment);
+                wheel.appendChild(text);
             });
+
+            wheel.appendChild(svg);
+            wheel.appendChild(center);
         }
 
         // Spin the wheel
@@ -389,9 +532,16 @@
             // Calculate result after animation
             setTimeout(() => {
                 const normalizedRotation = (360 - (totalRotation % 360)) % 360;
-                const angleStep = 360 / options.length;
-                const winningIndex = Math.floor(normalizedRotation / angleStep);
-                const result = options[winningIndex];
+                const segments = calculateSegmentAngles();
+
+                // Find which segment the pointer landed on
+                let result = options[0];
+                for (let segment of segments) {
+                    if (normalizedRotation >= segment.startAngle && normalizedRotation < segment.endAngle) {
+                        result = segment.option;
+                        break;
+                    }
+                }
 
                 document.getElementById('result').textContent = `🎉 ${result} !`;
                 isSpinning = false;
@@ -415,6 +565,14 @@
 
         // Remove option
         function removeOption(index) {
+            const optionToRemove = options[index];
+
+            // Prevent removing the special option
+            if (optionToRemove === SPECIAL_OPTION) {
+                alert('Cette option spéciale ne peut pas être supprimée !');
+                return;
+            }
+
             if (options.length > 2) {
                 options.splice(index, 1);
                 saveOptions();
