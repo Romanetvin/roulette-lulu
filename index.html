@@ -147,6 +147,33 @@
             align-items: center;
         }
 
+        .toggle-container {
+            display: flex;
+            gap: 10px;
+            background: white;
+            padding: 5px;
+            border-radius: 50px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-btn {
+            padding: 10px 30px;
+            font-size: 1em;
+            background: transparent;
+            color: #999;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(135deg, #FF69B4, #FF1493);
+            color: white;
+        }
+
+        .toggle-btn:hover:not(.active) {
+            color: #FF69B4;
+            transform: scale(1.05);
+        }
+
         button {
             padding: 15px 40px;
             font-size: 1.3em;
@@ -307,7 +334,12 @@
 <body>
     <div class="container">
         <div class="left-section">
-            <h1>Les malheurs de Lulu</h1>
+            <h1 id="title">Les malheurs de Lulu</h1>
+
+            <div class="toggle-container">
+                <button class="toggle-btn active" id="lucieBtn">Lucie</button>
+                <button class="toggle-btn" id="suzanneBtn">Suzanne</button>
+            </div>
 
             <div class="controls">
                 <button id="spinBtn">Tourner la roue !</button>
@@ -335,8 +367,11 @@
     </div>
 
     <script>
-        // Default options
-        let options = [
+        // Current mode: 'lucie' or 'suzanne'
+        let currentMode = 'lucie';
+
+        // Default options for Lucie
+        const lucieOptions = [
             "Se bloquer le dos",
             "Tomber malade",
             "JP fait des jeanpauleries",
@@ -349,6 +384,26 @@
             "François n'a pas le budget",
             "Tout va bien !"
         ];
+
+        // Default options for Suzanne
+        const suzanneOptions = [
+            "aller manger des churros au Sacré Coeur",
+            "s'envoyer en l'air avec un mec qui ressemble à Jason Momoa",
+            "danser toute la nuit sur ACDC",
+            "visiter le Louvre sans rien voler",
+            "faire un escape game spécial film d'horreur",
+            "aller manger rue Sainte Anne avec Vincent",
+            "manger équilibré (sans parmesan)",
+            "s'acheter une planche de surf",
+            "faire une dépendaison de crémaillère",
+            "laisse tranquille la mozza de chez Leclerc",
+            "aller sur le roof top de l'Heron B",
+            "boire la bouteille de champagne avec Nico",
+            "préparer des mots à emporter pour Sarah et Lucie",
+            "s'habiller en couleur"
+        ];
+
+        let options = [...lucieOptions];
 
         // Special option with small probability (5%)
         const SPECIAL_OPTION = "Tout va bien !";
@@ -365,42 +420,36 @@
 
         // Load options from localStorage
         function loadOptions() {
-            const saved = localStorage.getItem('rouletteLuluOptions');
-            if (saved) {
-                const savedOptions = JSON.parse(saved);
-                // Check if we need to update with new default options
-                const defaultOptions = [
-                    "Se bloquer le dos",
-                    "Tomber malade",
-                    "JP fait des jeanpauleries",
-                    "Retard d'acompte",
-                    "J'ai oublié ma tarte au butternut",
-                    "L'enfant n'a pas dormi",
-                    "L'enfant a fait pipi au lit",
-                    "Océane me fait des misères",
-                    "Geoffroy me fait des misères",
-                    "François n'a pas le budget",
-                    "Tout va bien !"
-                ];
+            const savedLucie = localStorage.getItem('rouletteLucieOptions');
+            const savedSuzanne = localStorage.getItem('rouletteSuzanneOptions');
 
-                // If saved has fewer items than defaults, use defaults
-                if (savedOptions.length < defaultOptions.length) {
-                    options = defaultOptions;
-                    saveOptions();
-                } else {
-                    options = savedOptions;
-                    // Ensure special option exists
-                    if (!options.includes(SPECIAL_OPTION)) {
-                        options.push(SPECIAL_OPTION);
-                        saveOptions();
-                    }
-                }
+            if (savedLucie) {
+                const parsed = JSON.parse(savedLucie);
+                lucieOptions.length = 0;
+                lucieOptions.push(...parsed);
             }
+
+            if (savedSuzanne) {
+                const parsed = JSON.parse(savedSuzanne);
+                suzanneOptions.length = 0;
+                suzanneOptions.push(...parsed);
+            }
+
+            // Load current options based on mode
+            options = currentMode === 'lucie' ? [...lucieOptions] : [...suzanneOptions];
         }
 
         // Save options to localStorage
         function saveOptions() {
-            localStorage.setItem('rouletteLuluOptions', JSON.stringify(options));
+            if (currentMode === 'lucie') {
+                localStorage.setItem('rouletteLucieOptions', JSON.stringify(lucieOptions));
+                lucieOptions.length = 0;
+                lucieOptions.push(...options);
+            } else {
+                localStorage.setItem('rouletteSuzanneOptions', JSON.stringify(suzanneOptions));
+                suzanneOptions.length = 0;
+                suzanneOptions.push(...options);
+            }
         }
 
         // Calculate segment angles based on probabilities
@@ -408,8 +457,8 @@
             const segments = [];
             let currentAngle = 0;
 
-            // Check if special option exists
-            const specialIndex = options.indexOf(SPECIAL_OPTION);
+            // Check if special option exists (only for Lucie mode)
+            const specialIndex = currentMode === 'lucie' ? options.indexOf(SPECIAL_OPTION) : -1;
             const hasSpecial = specialIndex !== -1;
 
             if (hasSpecial) {
@@ -567,8 +616,8 @@
         function removeOption(index) {
             const optionToRemove = options[index];
 
-            // Prevent removing the special option
-            if (optionToRemove === SPECIAL_OPTION) {
+            // Prevent removing the special option (only for Lucie mode)
+            if (currentMode === 'lucie' && optionToRemove === SPECIAL_OPTION) {
                 alert('Cette option spéciale ne peut pas être supprimée !');
                 return;
             }
@@ -605,12 +654,53 @@
             });
         }
 
+        // Switch mode function
+        function switchMode(mode) {
+            if (isSpinning) return;
+
+            currentMode = mode;
+
+            // Update toggle buttons
+            document.getElementById('lucieBtn').classList.toggle('active', mode === 'lucie');
+            document.getElementById('suzanneBtn').classList.toggle('active', mode === 'suzanne');
+
+            // Update title
+            const title = document.getElementById('title');
+            if (mode === 'lucie') {
+                title.textContent = 'Les malheurs de Lulu';
+            } else {
+                title.textContent = 'Les aventures de Suzanne';
+            }
+
+            // Update center text
+            const centerText = document.querySelector('.wheel-center');
+            centerText.textContent = mode === 'lucie' ? 'LULU' : 'SUSU';
+
+            // Load appropriate options
+            options = mode === 'lucie' ? [...lucieOptions] : [...suzanneOptions];
+
+            // Update result text
+            if (mode === 'lucie') {
+                document.getElementById('result').textContent = 'Clique pour découvrir ton malheur !';
+            } else {
+                document.getElementById('result').textContent = 'Clique pour découvrir ton aventure !';
+            }
+
+            // Recreate wheel and update list
+            createWheel();
+            updateOptionsList();
+        }
+
         // Allow Enter key to add option
         document.getElementById('newOption').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 addOption();
             }
         });
+
+        // Toggle button events
+        document.getElementById('lucieBtn').addEventListener('click', () => switchMode('lucie'));
+        document.getElementById('suzanneBtn').addEventListener('click', () => switchMode('suzanne'));
 
         // Initialize
         loadOptions();
